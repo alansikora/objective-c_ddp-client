@@ -41,7 +41,9 @@
 
 -(void)send: (NSDictionary*)message_dictionary
 {
-    NSString* message_string = message_dictionary.JSONRepresentation;
+    SBJsonWriter *jsonWriter = [[SBJsonWriter alloc] init];
+    
+    NSString* message_string = [jsonWriter stringWithObject:message_dictionary];
     
     [socket send:message_string];
 }
@@ -80,19 +82,21 @@
 
 - (void)webSocketDidOpen: (SRWebSocket *)webSocket;
 {
-    [self send: [NSDictionary dictionaryWithObjectsAndKeys: @"connect", @"msg", nil]];
+    [self send: [NSDictionary dictionaryWithObjectsAndKeys: @"connect", @"msg", @"pre1", @"version", nil]];
 }
 
 - (void)webSocket: (SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 {
 //    Handle webSocket error
+    NSLog(@"ERROR");
 }
 
 -(void)webSocket: (SRWebSocket *)webSocket didReceiveMessage:(id)message
 {
     NSString* message_string = (NSString*)message;
+    SBJsonParser *jsonParser = [[SBJsonParser alloc] init];
     
-    NSDictionary* message_dictionary = (NSDictionary*)message_string.JSONValue;
+    NSDictionary* message_dictionary = (NSDictionary*)[jsonParser objectWithString:message_string];
     
     if([[message_dictionary valueForKey:@"server_id"] length] > 0) {
         [delegate onOpen: message_dictionary];
@@ -102,8 +106,28 @@
         [delegate onConnect: message_dictionary];
     }
     
-    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"data"]) {
-        [delegate onData: message_dictionary];
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"added"]) {
+        [delegate onAdded: message_dictionary];
+    }
+    
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"changed"]) {
+        [delegate onChanged: message_dictionary];
+    }
+    
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"removed"]) {
+        [delegate onRemoved: message_dictionary];
+    }
+    
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"ready"]) {
+        [delegate onReady: message_dictionary];
+    }
+    
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"addedBefore"]) {
+        [delegate onAddedBefore: message_dictionary];
+    }
+    
+    if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"movedBefore"]) {
+        [delegate onMovedBefore: message_dictionary];
     }
     
     if([[message_dictionary valueForKey:@"msg"] isEqualToString:@"result"]) {

@@ -18,7 +18,22 @@
 - (void)onConnect: (NSDictionary*)message_dictionary;
 
 @optional
-- (void)onData: (NSDictionary*)message_dictionary;
+- (void)onAdded: (NSDictionary*)message_dictionary;
+
+@optional
+- (void)onChanged: (NSDictionary*)message_dictionary;
+
+@optional
+- (void)onRemoved: (NSDictionary*)message_dictionary;
+
+@optional
+- (void)onReady: (NSDictionary*)message_dictionary;
+
+@optional
+- (void)onAddedBefore: (NSDictionary*)message_dictionary;
+
+@optional
+- (void)onMovedBefore: (NSDictionary*)message_dictionary;
 
 @optional
 - (void)onResult: (NSDictionary*)message_dictionary;
